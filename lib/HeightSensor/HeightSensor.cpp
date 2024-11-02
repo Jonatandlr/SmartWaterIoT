@@ -15,8 +15,19 @@ void HeightSensor::begin() {
         while (1);
     }
     
-    lox.setMeasurementTimingBudgetMicroSeconds(timingBudget);
+    lox.setMeasurementTimingBudgetMicroSeconds(_timingBudget);
     
     Serial.println("Calibración completada. Comenzando medición...");
     delay(1000);
+}
+
+int HeightSensor::getDistance(){
+    VL53L0X_RangingMeasurementData_t measure;
+    lox.rangingTest(&measure, false);
+    if (measure.RangeStatus != 4) { 
+        int distance = (measure.RangeMilliMeter / 10);
+        return distance;
+    } else {
+        return -1;
+    }
 }

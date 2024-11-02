@@ -1,58 +1,96 @@
+#include <WiFi.h>                              
+#include <PubSubClient.h>                       
 #include <Arduino.h>
+#include <HardwareSerial.h>
 #include <Wire.h>
-#include <Adafruit_VL53L0X.h>
+#include <string.h>
+#define RXD2 16                                 
+#define TXD2 17                                 
 
-Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+HardwareSerial myserial(2);                    
+String inputstring = "";                       
+String sensorstring = "";                     
+boolean sensor_string_complete = false;        
 
-const int ajusteDistancia = 2; 
-const long timingBudget = 50000;
+// Configura tu red WiFi
+const char* ssid = "M16_HUGOS 2728";            
+const char* password = "12345678";             
 
-const int alturaTanque = 90; // Altura del tanque en cm
-const int nivelMaximo = 10;  // Nivel máximo de agua: 80 cm (90 - 80 = 10 cm desde el sensor)
-const int nivelMinimo = 70;  // Nivel mínimo de agua: 20 cm (90 - 20 = 70 cm desde el sensor)
+// Configura el broker MQTT
+const char* mqttServer = "192.168.137.34";     
+const int mqttPort = 1883;                     
 
-void setup() {
-  Serial.begin(9600);
-  Wire.begin();
+WiFiClient espClient;                          
+PubSubClient client(espClient);                
 
-  if (!lox.begin()) {
-    Serial.println(F("Failed to boot VL53L0X"));
-    while (1);
+unsigned long previousMillis = 0;               
+const long interval = 1000;                 
+
+void setup_wifi() {                           
+  delay(10);
+  Serial.print("Conectando a WiFi ");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {    
+    delay(500);
+    Serial.print(".");
   }
+  Serial.println(" conectado");
+}
 
-  lox.setMeasurementTimingBudgetMicroSeconds(timingBudget);
+void reconnect() {                            
+  while (!client.connected()) {
+    Serial.print("Intentando conectar al MQTT...");
+    if (client.connect("ESP32Client")) { 
+      Serial.println("conectado");
+    } else {
+      Serial.print("falló con error: ");
+      Serial.print(client.state());
+      delay(2000);                           
+    }
+  }
+}
 
-  Serial.println("Calibración completada. Comenzando medición...");
-  delay(1000);
+void send_EC_data() {                          
+  char sensorstring_array[30];                  
+  char *EC;                                    
+  sensorstring.toCharArray(sensorstring_array, 30); 
+
+  EC = strtok(sensorstring_array, ",");       
+
+  Serial.print("EC: ");
+  Serial.println(EC);                          
+
+
+  client.publish("esp/conductividad", EC);   
+}
+void setup() {
+  Serial.begin(9600);                          
+  myserial.begin(9600, SERIAL_8N1, RXD2, TXD2); 
+  inputstring.reserve(10);                      
+  sensorstring.reserve(30);                   
+  // setup_wifi();                              
+  // client.setServer(mqttServer, mqttPort);    
 }
 
 void loop() {
-  VL53L0X_RangingMeasurementData_t measure;
-  lox.rangingTest(&measure, false);
-
-  if (measure.RangeStatus != 4) { 
-    int distance = (measure.RangeMilliMeter / 10) + ajusteDistancia;
-
-    if (distance > alturaTanque) {
-      Serial.print("Error: medida fuera de rango (");
-      Serial.print(distance);
-      Serial.println(" cm)");
-    } else if (distance <= nivelMaximo) {
-      Serial.print("Alerta: Nivel máximo alcanzado (");
-      Serial.print(distance);
-      Serial.println(" cm)");
-    } else if (distance >= nivelMinimo) {
-      Serial.print("Alerta: Nivel mínimo alcanzado (");
-      Serial.print(distance);
-      Serial.println(" cm)");
-    } else {
-      Serial.print("Distancia al agua: ");
-      Serial.print(distance);
-      Serial.println(" cm");
+  if (myserial.available() > 0) {              
+    char inchar = (char)myserial.read();        
+    sensorstring += inchar;                
+    if (inchar == '\r') {                     
+      sensor_string_complete = true;          
     }
-  } else {
-    Serial.println("Error de medida");
+  }
+  unsigned long currentMillis = millis();      
+  if (sensor_string_complete) {               
+    if (isdigit(sensorstring[0])) {           
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;         
+        send_EC_data();                          
+      }
+    }
+    sensorstring = "";                      
+    sensor_string_complete = false;           
   }
 
-  delay(500);
 }
+

@@ -9,18 +9,12 @@ class HeightSensor {
     HeightSensor();
     void begin();
     void loop();
-    void setTimingBudget(long timingBudget);
-    void setAjusteDistancia(int ajusteDistancia);
-    void setAlturaTanque(int alturaTanque);
-    void setNivelMaximo(int nivelMaximo);
-    void setNivelMinimo(int nivelMinimo);
+    int getDistance();
+    
   private:
     Adafruit_VL53L0X lox;
-    int ajusteDistancia;
-    long timingBudget;
-    int alturaTanque;
-    int nivelMaximo;
-    int nivelMinimo;
+    int _distance;
+    const long _timingBudget = 50000;
 };
 
 #endif
