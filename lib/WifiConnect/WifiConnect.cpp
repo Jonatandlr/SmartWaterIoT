@@ -28,7 +28,7 @@ void WifiConnect::reconnect() {
             Serial.println("Conectado");
         } else {
             Serial.print("Falló con error: ");
-            Serial.print(_client.state());
+            Serial.println(_client.state());
             delay(2000);
         }
     }

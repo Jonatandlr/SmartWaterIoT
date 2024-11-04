@@ -10,7 +10,7 @@ void Conductivity::begin() {
 
 float Conductivity::getConductivity() {
     while (!_sensorStringComplete)
-    {
+    {   
         if (_myserial.available() > 0) {
             char inchar = (char)_myserial.read();
             _sensorData += inchar;
@@ -21,5 +21,6 @@ float Conductivity::getConductivity() {
     }
     _sensorStringComplete = false;
     float sensorValue = _sensorData.toFloat();
+    _sensorData = "";
     return sensorValue;
 }
