@@ -1,23 +1,24 @@
 
 #ifndef Conductivity_h
 #define Conductivity_h
-#include <Wire.h>
-#include <WiFi.h>                              
-#include <PubSubClient.h>                       
 #include <Arduino.h>
-         
-
+#include <HardwareSerial.h>
+#include <Wire.h>
+#include <string.h>
 
 class Conductivity
 {
   public:
     Conductivity();
     void begin();
-    void getConductivity();
+    float getConductivity();
   private:
     float _conductivity;
     int _TXD2=17;
     int _RXD2=16;
+    HardwareSerial _myserial;
+    String _sensorData = "";
+    bool _sensorStringComplete = false;
 };
 
 
