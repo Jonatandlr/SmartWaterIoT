@@ -8,7 +8,12 @@
 const char* ssid = "M16_HUGOS 2728";            
 const char* password = "12345678" ;    
 // Configura el broker MQTT
-const char* mqttServer = "192.168.137.76";      
+const char* mqttServer = "192.168.137.76"; 
+
+// topics
+const char* topicConductivity = "esp/conductivity";
+const char* topicHeight = "esp/height";
+
 
 WifiConnect wifi(ssid, password, mqttServer, 1883);
 Conductivity conductivity;
