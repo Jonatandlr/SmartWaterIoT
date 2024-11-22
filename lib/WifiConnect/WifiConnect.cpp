@@ -47,8 +47,8 @@ void WifiConnect::send_data(float sensorData, String topic) {
     char *EC;                                       // Puntero a char
     _sensorData.toCharArray(sensorstring_array, 30); // Convertir el String a un array de caracteres
     EC = strtok(sensorstring_array, ",");           // Separar el array de caracteres por comas
-    Serial.print("EC: ");
-    Serial.println(EC);                             // Imprimir el valor de EC
+    // Serial.print("EC: ");
+    // Serial.println(EC);                             // Imprimir el valor de EC
     _client.publish(topic.c_str(), EC);              // Publicar el valor de EC en el topic especificado
 }
 

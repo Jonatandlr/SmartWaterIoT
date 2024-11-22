@@ -21,11 +21,11 @@ void HeightSensor::begin() {
     delay(1000);
 }
 
-int HeightSensor::getDistance(){
+float HeightSensor::getDistance(){
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false);
     if (measure.RangeStatus != 4) { 
-        int distance = (measure.RangeMilliMeter / 10);
+        float distance = (measure.RangeMilliMeter / 10);
         return distance;
     } else {
         return -1;

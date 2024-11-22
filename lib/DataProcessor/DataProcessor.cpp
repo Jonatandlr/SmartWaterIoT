@@ -1,9 +1,9 @@
 #include "DataProcessor.h"
 
-DataProcessor::DataProcessor(int len) {
-    _len=len;
+DataProcessor::DataProcessor() {
+    _len=10;
     dataCount = 0; // Inicializamos el contador de datos a cero
-    data [len];
+    data [_len];
 }
 
 void DataProcessor::addData(float value) {

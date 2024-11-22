@@ -8,8 +8,7 @@ class HeightSensor {
   public:
     HeightSensor();
     void begin();
-    void loop();
-    int getDistance();
+    float getDistance();
     
   private:
     Adafruit_VL53L0X lox;
